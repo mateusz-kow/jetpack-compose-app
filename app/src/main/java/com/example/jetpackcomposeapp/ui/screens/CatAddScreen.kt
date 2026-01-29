@@ -2,25 +2,25 @@ package com.example.jetpackcomposeapp.ui.screens
 
 import android.net.Uri
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import com.example.jetpackcomposeapp.data.model.Image as CatImage
+import com.example.jetpackcomposeapp.ui.components.ImagePickerSection
 import com.example.jetpackcomposeapp.ui.utils.rememberGalleryLauncher
+import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
+import com.example.jetpackcomposeapp.ui.utils.getStoragePermissions
+import com.example.jetpackcomposeapp.ui.utils.hasStoragePermissions
+import com.example.jetpackcomposeapp.ui.utils.getCameraPermissions
+import com.example.jetpackcomposeapp.ui.utils.hasCameraPermissions
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 
 @Composable
 fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
@@ -28,9 +28,13 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
     var breed by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedImages by remember { mutableStateOf(listOf<CatImage>()) }
-    val coroutineScope = rememberCoroutineScope()
 
-    val galleryLauncher = rememberGalleryLauncher { uri ->
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
+    // Launcher for gallery picker (device gallery)
+    val galleryLauncher = rememberGalleryLauncher { uri: Uri ->
         coroutineScope.launch {
             viewModel.getImageRepository().saveImageFromGallery(uri)?.let {
                 selectedImages = selectedImages + it
@@ -38,41 +42,136 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
-        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Imię") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = breed, onValueChange = { breed = it }, label = { Text("Rasa") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Opis") }, modifier = Modifier.fillMaxWidth().height(150.dp))
+    // Permission launchers
+    val galleryPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            galleryLauncher.launch("image/*")
+        }
+    }
 
-        Row(Modifier.padding(vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { galleryLauncher.launch("image/*") }) {
-                Icon(Icons.Default.ThumbUp, null); Text(" Galeria")
-            }
-            Button(onClick = {
-                val key = "add_cat_${System.currentTimeMillis()}"
-                viewModel.setCameraCallback(key) { id ->
-                    coroutineScope.launch {
-                        viewModel.getImageRepository().getImageById(id)?.let { selectedImages = selectedImages + it }
+    val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            val callbackKey = "add_cat_camera_${System.currentTimeMillis()}"
+            viewModel.setCameraCallback(callbackKey) { imageId ->
+                coroutineScope.launch {
+                    viewModel.getImageRepository().getImageById(imageId)?.let {
+                        selectedImages = selectedImages + it
                     }
                 }
-                navController.navigate("camera/$key")
-            }) {
-                Icon(Icons.Default.ThumbUp, null); Text(" Aparat")
+            }
+            navController.navigate("camera/$callbackKey")
+        }
+    }
+
+    fun requestGalleryAccess() {
+        if (hasStoragePermissions(context)) {
+            galleryLauncher.launch("image/*")
+        } else {
+            galleryPermissionLauncher.launch(getStoragePermissions())
+        }
+    }
+
+    fun requestCameraAccess() {
+        if (hasCameraPermissions(context)) {
+            val callbackKey = "add_cat_camera_${System.currentTimeMillis()}"
+            viewModel.setCameraCallback(callbackKey) { imageId ->
+                coroutineScope.launch {
+                    viewModel.getImageRepository().getImageById(imageId)?.let {
+                        selectedImages = selectedImages + it
+                    }
+                }
+            }
+            navController.navigate("camera/$callbackKey")
+        } else {
+            cameraPermissionLauncher.launch(getCameraPermissions())
+        }
+    }
+
+    fun requestAppGalleryAccess() {
+        val key = "add_cat_gallery_${System.currentTimeMillis()}"
+        viewModel.setCameraCallback(key) { imageId ->
+            coroutineScope.launch {
+                viewModel.getImageRepository().getImageById(imageId)?.let {
+                    selectedImages = selectedImages + it
+                }
             }
         }
+        navController.navigate("gallerySelect/$key")
+    }
 
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(selectedImages) { img ->
-                AsyncImage(model = File(img.localPath), contentDescription = null, modifier = Modifier.size(100.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
+        Text(
+            text = "Dodaj kota",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Pola tekstowe
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Imię kota") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = breed,
+            onValueChange = { breed = it },
+            label = { Text("Rasa") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Opis") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            maxLines = 5
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Sekcja wyboru zdjęć
+        ImagePickerSection(
+            images = selectedImages,
+            onGalleryClick = { requestGalleryAccess() },
+            onCameraClick = { requestCameraAccess() },
+            onAppGalleryClick = { requestAppGalleryAccess() },
+            onImageRemove = { index ->
+                val newList = selectedImages.toMutableList()
+                newList.removeAt(index)
+                selectedImages = newList
             }
-        }
+        )
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Przycisk zapisu
         Button(
             onClick = {
                 viewModel.addCat(name, breed, description, selectedImages.map { it.id })
                 navController.popBackStack()
             },
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             enabled = name.isNotBlank()
-        ) { Text("Zapisz Kota") }
+        ) {
+            Text("Zapisz Kota")
+        }
     }
 }

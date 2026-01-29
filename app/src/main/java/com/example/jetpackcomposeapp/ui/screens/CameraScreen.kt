@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ThumbUp
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,9 +23,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.concurrent.Executors
 
 @Composable
 fun CameraScreen(
@@ -41,7 +41,6 @@ fun CameraScreen(
     var captureInProgress by remember { mutableStateOf(false) }
 
     val imageCapture = remember { ImageCapture.Builder().build() }
-    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         val previewView = remember { PreviewView(context) }
@@ -82,23 +81,42 @@ fun CameraScreen(
             onClick = {
                 if (!captureInProgress) {
                     captureInProgress = true
-                    val file = File(context.cacheDir, "${System.currentTimeMillis()}.jpg")
-                    val options = ImageCapture.OutputFileOptions.Builder(file).build()
+                    val tempFile = File(context.cacheDir, "temp_camera_${System.currentTimeMillis()}.jpg")
+                    val options = ImageCapture.OutputFileOptions.Builder(tempFile).build()
 
-                    imageCapture.takePicture(options, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
+                    // Use main executor so callback runs on UI thread; heavy IO will be moved to IO dispatcher
+                    imageCapture.takePicture(options, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             coroutineScope.launch {
-                                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                                val savedImage = catViewModel.getImageRepository().saveImageFromCamera(bitmap)
-                                if (savedImage != null && callbackKey != null) {
-                                    catViewModel.getCameraCallback(callbackKey)?.invoke(savedImage.id)
-                                    catViewModel.clearCameraCallback(callbackKey)
+                                try {
+                                    // Perform bitmap decode + repository save on IO
+                                    val savedImage = withContext(Dispatchers.IO) {
+                                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
+                                        catViewModel.getImageRepository().saveImageFromCamera(bitmap)
+                                    }
+
+                                    // Invoke callback on main thread
+                                    savedImage?.let { img ->
+                                        callbackKey?.let { key ->
+                                            catViewModel.getCameraCallback(key)?.invoke(img.id)
+                                            catViewModel.clearCameraCallback(key)
+                                        }
+                                    }
+                                } catch (t: Throwable) {
+                                    t.printStackTrace()
+                                } finally {
+                                    // cleanup and navigate back on main
+                                    captureInProgress = false
+                                    try { tempFile.delete() } catch (_: Exception) {}
+                                    navController.popBackStack()
                                 }
-                                captureInProgress = false
-                                navController.popBackStack()
                             }
                         }
-                        override fun onError(e: ImageCaptureException) { captureInProgress = false }
+
+                        override fun onError(exception: ImageCaptureException) {
+                            exception.printStackTrace()
+                            captureInProgress = false
+                        }
                     })
                 }
             },
@@ -106,7 +124,7 @@ fun CameraScreen(
             shape = CircleShape,
             containerColor = Color.White
         ) {
-            if (captureInProgress) CircularProgressIndicator()
+            if (captureInProgress) CircularProgressIndicator(color = Color.Black)
             else Icon(Icons.Default.ThumbUp, contentDescription = "Foto", tint = Color.Black)
         }
     }

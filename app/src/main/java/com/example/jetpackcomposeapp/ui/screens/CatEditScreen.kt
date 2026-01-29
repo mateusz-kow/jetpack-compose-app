@@ -1,32 +1,20 @@
 package com.example.jetpackcomposeapp.ui.screens
 
 import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ThumbUp
-// ZMIANA: Importuj z material3, nie z wear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import com.example.jetpackcomposeapp.data.model.Cat
 import com.example.jetpackcomposeapp.data.model.Image
-
+import com.example.jetpackcomposeapp.ui.components.ImagePickerSection
 import com.example.jetpackcomposeapp.ui.utils.rememberGalleryLauncher
 import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
 import com.example.jetpackcomposeapp.ui.utils.getStoragePermissions
@@ -35,7 +23,6 @@ import com.example.jetpackcomposeapp.ui.utils.getCameraPermissions
 import com.example.jetpackcomposeapp.ui.utils.hasCameraPermissions
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 
 @Composable
 fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatViewModel) {
@@ -49,7 +36,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    // Launcher for gallery picker
+    // Launcher for gallery picker (device gallery)
     val galleryLauncher = rememberGalleryLauncher { uri: Uri ->
         coroutineScope.launch {
             val imageRepository = viewModel.getImageRepository()
@@ -71,8 +58,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
     val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
-            // Ustaw callback przed nawigacją
-            val callbackKey = "catEdit_${catId}_${System.currentTimeMillis()}"
+            val callbackKey = "catEdit_${catId}_camera_${System.currentTimeMillis()}"
             viewModel.setCameraCallback(callbackKey) { imageId ->
                 coroutineScope.launch {
                     val imageRepository = viewModel.getImageRepository()
@@ -96,8 +82,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
 
     fun requestCameraAccess() {
         if (hasCameraPermissions(context)) {
-            // Ustaw callback przed nawigacją
-            val callbackKey = "catEdit_${catId}_${System.currentTimeMillis()}"
+            val callbackKey = "catEdit_${catId}_camera_${System.currentTimeMillis()}"
             viewModel.setCameraCallback(callbackKey) { imageId ->
                 coroutineScope.launch {
                     val imageRepository = viewModel.getImageRepository()
@@ -111,6 +96,17 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
         } else {
             cameraPermissionLauncher.launch(getCameraPermissions())
         }
+    }
+
+    fun requestAppGalleryAccess() {
+        val key = "catEdit_${catId}_gallery_${System.currentTimeMillis()}"
+        viewModel.setCameraCallback(key) { imageId ->
+            coroutineScope.launch {
+                val image = viewModel.getImageRepository().getImageById(imageId)
+                image?.let { catImages = catImages + it }
+            }
+        }
+        navController.navigate("gallerySelect/$key")
     }
 
     LaunchedEffect(catId) {
@@ -171,118 +167,18 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sekcja zdjęć
-            Text(
-                text = "Zdjęcia",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
+            // Sekcja wyboru zdjęć
+            ImagePickerSection(
+                images = catImages,
+                onGalleryClick = { requestGalleryAccess() },
+                onCameraClick = { requestCameraAccess() },
+                onAppGalleryClick = { requestAppGalleryAccess() },
+                onImageRemove = { index ->
+                    val newList = catImages.toMutableList()
+                    newList.removeAt(index)
+                    catImages = newList
+                }
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Lista zdjęć z możliwością usuwania i dodawania
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                // Przycisk dodawania zdjęcia
-                item {
-                    Card(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clickable { requestGalleryAccess() },
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.Add,
-                                    contentDescription = "Wybierz z galerii",
-                                    modifier = Modifier.size(32.dp)
-                                )
-                                Text("Galeria", style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-                }
-
-                // Przycisk robienia zdjęcia aparatem
-                item {
-                    Card(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clickable { requestCameraAccess() },
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    Icons.Default.ThumbUp,
-                                    contentDescription = "Zrób zdjęcie aparatem",
-                                    modifier = Modifier.size(32.dp)
-                                )
-                                Text("Aparat", style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-                }
-
-                // Istniejące zdjęcia
-                itemsIndexed(catImages) { index, image ->
-                    Box(modifier = Modifier.size(120.dp)) {
-                        val imageFile = File(image.localPath)
-                        AsyncImage(
-                            model = imageFile,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        // Przycisk usuwania
-                        IconButton(
-                            onClick = {
-                                val newList = catImages.toMutableList()
-                                newList.removeAt(index)
-                                catImages = newList
-                            },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(24.dp)
-                        ) {
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                ),
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Usuń",
-                                        tint = MaterialTheme.colorScheme.onError,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -329,3 +225,260 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
         }
     }
 }
+//loadedCat?.let {
+//    name = it.name
+//    breed = it.breed
+//    description = it.description
+//    catImages = viewModel.getImagesForCat(it)
+//}
+//}
+//
+//cat?.let {
+//    catData ->
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp)
+//            .verticalScroll(scrollState)
+//    ) {
+//        Text(
+//            text = "Edytuj kota",
+//            style = MaterialTheme.typography.headlineLarge,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier.padding(bottom = 16.dp)
+//        )
+//
+//        // Pola tekstowe
+//        OutlinedTextField(
+//            value = name,
+//            onValueChange = { name = it },
+//            label = { Text("Imię kota") },
+//            modifier = Modifier.fillMaxWidth(),
+//            singleLine = true
+//        )
+//
+//        Spacer(modifier = Modifier.height(8.dp))
+//
+//        OutlinedTextField(
+//            value = breed,
+//            onValueChange = { breed = it },
+//            label = { Text("Rasa") },
+//            modifier = Modifier.fillMaxWidth(),
+//            singleLine = true
+//        )
+//
+//        Spacer(modifier = Modifier.height(8.dp))
+//
+//        OutlinedTextField(
+//            value = description,
+//            onValueChange = { description = it },
+//            label = { Text("Opis") },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(120.dp),
+//            maxLines = 5
+//        )
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        // Sekcja zdjęć
+//        Text(
+//            text = "Zdjęcia",
+//            style = MaterialTheme.typography.titleLarge,
+//            fontWeight = FontWeight.SemiBold
+//        )
+//
+//        Spacer(modifier = Modifier.height(8.dp))
+//
+//        // Lista zdjęć z możliwością usuwania i dodawania
+//        LazyRow(
+//            horizontalArrangement = Arrangement.spacedBy(8.dp),
+//            contentPadding = PaddingValues(vertical = 8.dp)
+//        ) {
+//            // Przycisk dodawania zdjęcia
+//            item {
+//                Card(
+//                    modifier = Modifier
+//                        .size(120.dp)
+//                        .clickable { requestGalleryAccess() },
+//                    colors = CardDefaults.cardColors(
+//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+//                    )
+//                ) {
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                            Icon(
+//                                Icons.Default.Add,
+//                                contentDescription = "Wybierz z galerii",
+//                                modifier = Modifier.size(32.dp)
+//                            )
+//                            Text("Galeria", style = MaterialTheme.typography.bodySmall)
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Przycisk robienia zdjęcia aparatem
+//            item {
+//                Card(
+//                    modifier = Modifier
+//                        .size(120.dp)
+//                        .clickable { requestCameraAccess() },
+//                    colors = CardDefaults.cardColors(
+//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+//                    )
+//                ) {
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                            Icon(
+//                                Icons.Default.ThumbUp,
+//                                contentDescription = "Zrób zdjęcie aparatem",
+//                                modifier = Modifier.size(32.dp)
+//                            )
+//                            Text("Aparat", style = MaterialTheme.typography.bodySmall)
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Nowy: przycisk wyboru z galerii aplikacji
+//            item {
+//                Card(
+//                    modifier = Modifier
+//                        .size(120.dp)
+//                        .clickable {
+//                            val key = "catEdit_${catId}_${System.currentTimeMillis()}_gallery"
+//                            viewModel.setCameraCallback(key) { imageId ->
+//                                coroutineScope.launch {
+//                                    val image = viewModel.getImageRepository().getImageById(imageId)
+//                                    image?.let { catImages = catImages + it }
+//                                }
+//                            }
+//                            navController.navigate("gallerySelect/$key")
+//                        },
+//                    colors = CardDefaults.cardColors(
+//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+//                    )
+//                ) {
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                            Icon(
+//                                Icons.Default.Add,
+//                                contentDescription = "Wybierz z galerii aplikacji",
+//                                modifier = Modifier.size(32.dp)
+//                            )
+//                            Text("Galeria App", style = MaterialTheme.typography.bodySmall)
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Istniejące zdjęcia
+//            itemsIndexed(catImages) { index, image ->
+//                Box(modifier = Modifier.size(120.dp)) {
+//                    val imageFile = File(image.localPath)
+//                    AsyncImage(
+//                        model = imageFile,
+//                        contentDescription = null,
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .clip(RoundedCornerShape(12.dp))
+//                            .pointerInput(Unit) {
+//                                detectTapGestures(onLongPress = {
+//                                    // Usuń z listy lokalnie
+//                                    val newList = catImages.toMutableList()
+//                                    newList.removeAt(index)
+//                                    catImages = newList
+//                                })
+//                            },
+//                        contentScale = ContentScale.Crop
+//                    )
+//
+//                    // Przycisk usuwania
+//                    IconButton(
+//                        onClick = {
+//                            val newList = catImages.toMutableList()
+//                            newList.removeAt(index)
+//                            catImages = newList
+//                        },
+//                        modifier = Modifier
+//                            .align(Alignment.TopEnd)
+//                            .size(24.dp)
+//                    ) {
+//                        Card(
+//                            colors = CardDefaults.cardColors(
+//                                containerColor = MaterialTheme.colorScheme.error
+//                            ),
+//                            modifier = Modifier.size(24.dp)
+//                        ) {
+//                            Box(
+//                                modifier = Modifier.fillMaxSize(),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                Icon(
+//                                    Icons.Default.Delete,
+//                                    contentDescription = "Usuń",
+//                                    tint = MaterialTheme.colorScheme.onError,
+//                                    modifier = Modifier.size(16.dp)
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        Spacer(modifier = Modifier.height(24.dp))
+//
+//        // Przyciski akcji
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.spacedBy(8.dp)
+//        ) {
+//            OutlinedButton(
+//                onClick = { navController.popBackStack() },
+//                modifier = Modifier.weight(1f)
+//            ) {
+//                Text("Anuluj")
+//            }
+//
+//            Button(
+//                onClick = {
+//                    if (name.isNotBlank()) {
+//                        viewModel.updateCat(
+//                            catData.copy(
+//                                name = name,
+//                                breed = breed,
+//                                description = description,
+//                                imageIds = catImages.map { it.id }
+//                            )
+//                        )
+//                        navController.popBackStack()
+//                    }
+//                },
+//                modifier = Modifier.weight(1f),
+//                enabled = name.isNotBlank()
+//            ) {
+//                Text("Zapisz zmiany")
+//            }
+//        }
+//    }
+//} ?: run {
+//    // Loading state
+//    Box(
+//        modifier = Modifier.fillMaxSize(),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        CircularProgressIndicator()
+//    }
+//}
+//}

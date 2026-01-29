@@ -19,4 +19,5 @@ sealed class NavigationItem(val route: String, val title: String, val icon: Imag
     object CameraWithCallback : NavigationItem("camera/{callbackMode}", "Camera", Icons.Default.Call)
     object Viewer : NavigationItem("viewer/{catId}/{imageIndex}", "Viewer", Icons.Default.ShoppingCart)
     object GalleryViewer : NavigationItem("galleryViewer/{imageIndex}", "Gallery Viewer", Icons.Default.ShoppingCart)
+    object GallerySelect : NavigationItem("gallerySelect/{callbackKey}", "Gallery Select", Icons.Default.ShoppingCart)
 }

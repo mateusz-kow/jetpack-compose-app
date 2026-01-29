@@ -117,6 +117,15 @@ fun NavGraph(navController: NavHostController, catViewModel: CatViewModel) {
                 val imageIndex = backStackEntry.arguments?.getInt("imageIndex") ?: 0
                 GalleryViewerScreen(navController, imageIndex, catViewModel)
             }
+
+            // Trasa dla wyboru obrazu z galerii aplikacji (z callbackKey)
+            composable(
+                route = NavigationItem.GallerySelect.route,
+                arguments = listOf(navArgument("callbackKey") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val callbackKey = backStackEntry.arguments?.getString("callbackKey")
+                GalleryGridScreen(navController, catViewModel, callbackKey)
+            }
         }
     }
 }
