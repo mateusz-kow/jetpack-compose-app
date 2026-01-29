@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -42,12 +43,20 @@ fun GalleryViewerScreen(
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                pageSpacing = 16.dp
+                pageSpacing = 16.dp,
+                userScrollEnabled = true // Zapewniam że swipe jest włączony
             ) { pageIndex ->
                 // Logika Zoomu dla każdego zdjęcia z osobna
                 var scale by remember { mutableFloatStateOf(1f) }
-                val state = rememberTransformableState { zoomChange, _, _ ->
-                    scale = (scale * zoomChange).coerceIn(1f, 5f) // Limit zoomu od 1x do 5x
+                var offset by remember { mutableStateOf(Offset.Zero) }
+
+                val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+                    scale = (scale * zoomChange).coerceIn(1f, 5f)
+                    offset = if (scale > 1f) {
+                        offset + offsetChange
+                    } else {
+                        Offset.Zero
+                    }
                 }
 
                 val imageFile = File(allImages[pageIndex].localPath)
@@ -58,9 +67,18 @@ fun GalleryViewerScreen(
                         .fillMaxSize()
                         .graphicsLayer(
                             scaleX = scale,
-                            scaleY = scale
+                            scaleY = scale,
+                            translationX = offset.x,
+                            translationY = offset.y
                         )
-                        .transformable(state = state),
+                        // Tylko dodaj transformable gdy zoom > 1, żeby nie kolidować z pager
+                        .let { modifier ->
+                            if (scale > 1.05f) {
+                                modifier.transformable(state = state)
+                            } else {
+                                modifier
+                            }
+                        },
                     contentScale = ContentScale.Fit
                 )
             }

@@ -1,3 +1,4 @@
+// kotlin
 package com.example.jetpackcomposeapp.ui.navigation
 
 import androidx.compose.foundation.layout.padding
@@ -9,18 +10,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.jetpackcomposeapp.ui.screens.*
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpackcomposeapp.viewmodel.CatViewModel) {
+fun NavGraph(navController: NavHostController, catViewModel: CatViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Logika określająca tytuł i widoczność strzałki wstecz
     val canNavigateBack = navController.previousBackStackEntry != null
     val title = when {
         currentRoute == NavigationItem.Home.route -> "O Autorze"
@@ -35,22 +37,25 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    if (canNavigateBack) {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Wstecz")
+            if (currentRoute?.startsWith("viewer") != true &&
+                currentRoute?.startsWith("galleryViewer") != true &&
+                currentRoute?.startsWith("camera") != true) {
+                CenterAlignedTopAppBar(
+                    title = { Text(title) },
+                    navigationIcon = {
+                        if (canNavigateBack) {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Wstecz")
+                            }
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
-            )
+            }
         },
         bottomBar = {
-            // Ukrywamy BottomBar na ekranach Edycji, Viewerze i Aparacie dla lepszego UX
             if (currentRoute == NavigationItem.Home.route ||
                 currentRoute == NavigationItem.Cats.route ||
                 currentRoute == NavigationItem.Gallery.route) {
@@ -69,7 +74,6 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
             composable(NavigationItem.Add.route) { CatAddScreen(navController, catViewModel) }
             composable(NavigationItem.Camera.route) { CameraScreen(navController, catViewModel) }
 
-            // Camera z callback
             composable(
                 route = NavigationItem.CameraWithCallback.route,
                 arguments = listOf(navArgument("callbackMode") { type = NavType.StringType })
@@ -78,7 +82,6 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
                 CameraScreen(navController, catViewModel, callbackKey)
             }
 
-            // Poprawiona obsługa argumentów (String -> Int)
             composable(
                 route = NavigationItem.Detail.route,
                 arguments = listOf(navArgument("catId") { type = NavType.IntType })
@@ -107,7 +110,6 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
                 ImageViewerScreen(navController, catId, imageIndex, catViewModel)
             }
 
-            // Gallery Viewer - dla przeglądania wszystkich zdjęć z galerii
             composable(
                 route = NavigationItem.GalleryViewer.route,
                 arguments = listOf(navArgument("imageIndex") { type = NavType.IntType })

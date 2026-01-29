@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -50,7 +50,7 @@ fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel)
             FloatingActionButton(
                 onClick = { requestCameraAccess() }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Zrób zdjęcie")
+                Icon(Icons.Default.ThumbUp, contentDescription = "Zrób zdjęcie")
             }
         }
     ) { paddingValues ->

@@ -11,6 +11,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ThumbUp
+// ZMIANA: Importuj z material3, nie z wear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +26,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.jetpackcomposeapp.data.model.Cat
 import com.example.jetpackcomposeapp.data.model.Image
+
 import com.example.jetpackcomposeapp.ui.utils.rememberGalleryLauncher
 import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
 import com.example.jetpackcomposeapp.ui.utils.getStoragePermissions
@@ -224,7 +227,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
-                                    Icons.Default.Add,
+                                    Icons.Default.ThumbUp,
                                     contentDescription = "Zrób zdjęcie aparatem",
                                     modifier = Modifier.size(32.dp)
                                 )
