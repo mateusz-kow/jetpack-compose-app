@@ -30,14 +30,20 @@ fun ImageViewerScreen(
     initialIndex: Int,
     viewModel: CatViewModel
 ) {
-    var cat by remember { mutableStateOf<com.example.jetpackcomposeapp.data.model.Cat?>(null) }
+    var catImages by remember { mutableStateOf(listOf<com.example.jetpackcomposeapp.data.model.Image>()) }
 
     LaunchedEffect(catId) {
-        cat = viewModel.getCatById(catId)
+        val cat = viewModel.getCatById(catId)
+        cat?.let {
+            catImages = viewModel.getImagesForCat(it)
+        }
     }
 
-    cat?.let { catData ->
-        val pagerState = rememberPagerState(initialPage = initialIndex, pageCount = { catData.images.size })
+    if (catImages.isNotEmpty()) {
+        val pagerState = rememberPagerState(
+            initialPage = initialIndex.coerceIn(0, catImages.size - 1),
+            pageCount = { catImages.size }
+        )
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             // Pager do przesuwania zdjęć lewo-prawo
@@ -52,8 +58,9 @@ fun ImageViewerScreen(
                     scale = (scale * zoomChange).coerceIn(1f, 5f) // Limit zoomu od 1x do 5x
                 }
 
+                val imageFile = java.io.File(catImages[pageIndex].localPath)
                 AsyncImage(
-                    model = catData.images[pageIndex],
+                    model = imageFile,
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
@@ -77,10 +84,26 @@ fun ImageViewerScreen(
             ) {
                 Icon(Icons.Default.Close, contentDescription = "Zamknij", tint = Color.White)
             }
+
+            // Wskaźnik pozycji
+            if (catImages.size > 1) {
+                Text(
+                    text = "${pagerState.currentPage + 1} / ${catImages.size}",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .background(Color.Black.copy(alpha = 0.5f), MaterialTheme.shapes.small)
+                        .padding(8.dp)
+                )
+            }
         }
-    } ?: run {
+    } else {
         // Loading state
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator(color = Color.White)
         }
     }

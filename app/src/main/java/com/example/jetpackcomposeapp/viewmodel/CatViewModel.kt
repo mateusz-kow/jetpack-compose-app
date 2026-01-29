@@ -7,6 +7,8 @@ import com.example.jetpackcomposeapp.data.local.AppDatabase
 import com.example.jetpackcomposeapp.data.local.CatDao
 import com.example.jetpackcomposeapp.data.local.DatabaseModule
 import com.example.jetpackcomposeapp.data.model.Cat
+import com.example.jetpackcomposeapp.data.model.Image
+import com.example.jetpackcomposeapp.data.repository.ImageRepository
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
@@ -16,6 +18,7 @@ import java.util.Date
 class CatViewModel(application: Application) : AndroidViewModel(application) {
     private val database: AppDatabase = DatabaseModule.getDatabase(application)
     private val catDao: CatDao = database.catDao()
+    private val imageRepository: ImageRepository = ImageRepository(application, database.imageDao())
 
     val cats: StateFlow<List<Cat>> = catDao.getAllCats()
         .stateIn(
@@ -24,8 +27,15 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
+    val allImages: StateFlow<List<Image>> = imageRepository.getAllImages()
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     init {
-        // Dodaj przykładowe dane przy pierwszym uruchomieniu
+        // Dodaj przykładowe dane przy pierwszym uruchomieniu (bez zdjęć)
         viewModelScope.launch {
             val existingCats = catDao.getAllCats().first()
             if (existingCats.isEmpty()) {
@@ -41,33 +51,21 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
                 breed = "Persian",
                 description = "A fluffy and friendly Persian cat with beautiful long fur. Loves to be petted and enjoys sunny spots by the window.",
                 createdAt = Date(),
-                images = listOf(
-                    "https://placekitten.com/800/600",
-                    "https://placekitten.com/801/601",
-                    "https://placekitten.com/802/602"
-                )
+                imageIds = emptyList() // Puste - użytkownik doda własne zdjęcia
             ),
             Cat(
                 name = "Mittens",
                 breed = "Siamese",
                 description = "A curious and vocal Siamese cat with striking blue eyes. Very intelligent and loves interactive toys.",
-                createdAt = Date(System.currentTimeMillis() - 86400000), // 1 day ago
-                images = listOf(
-                    "https://placekitten.com/803/603",
-                    "https://placekitten.com/804/604"
-                )
+                createdAt = Date(System.currentTimeMillis() - 86400000),
+                imageIds = emptyList()
             ),
             Cat(
                 name = "Shadow",
                 breed = "Maine Coon",
                 description = "A large and gentle Maine Coon cat with impressive size and gentle nature. Great with children and other pets.",
-                createdAt = Date(System.currentTimeMillis() - 172800000), // 2 days ago
-                images = listOf(
-                    "https://placekitten.com/805/605",
-                    "https://placekitten.com/806/606",
-                    "https://placekitten.com/807/607",
-                    "https://placekitten.com/808/608"
-                )
+                createdAt = Date(System.currentTimeMillis() - 172800000),
+                imageIds = emptyList()
             )
         )
 
@@ -76,14 +74,14 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addCat(name: String, breed: String, description: String, images: List<String> = emptyList()) {
+    fun addCat(name: String, breed: String, description: String, imageIds: List<Int> = emptyList()) {
         viewModelScope.launch {
             val newCat = Cat(
                 name = name,
                 breed = breed,
                 description = description,
                 createdAt = Date(),
-                images = images
+                imageIds = imageIds
             )
             catDao.insertCat(newCat)
         }
@@ -104,4 +102,10 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun getCatById(catId: Int): Cat? {
         return catDao.getCatById(catId)
     }
+
+    suspend fun getImagesForCat(cat: Cat): List<Image> {
+        return imageRepository.getImagesByIds(cat.imageIds)
+    }
+
+    fun getImageRepository(): ImageRepository = imageRepository
 }

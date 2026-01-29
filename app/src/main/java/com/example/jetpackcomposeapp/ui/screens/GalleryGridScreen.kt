@@ -14,23 +14,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
+import java.io.File
 
 @Composable
 fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel) {
-    val cats by viewModel.cats.collectAsState()
-
-    val allImages = cats.flatMap { cat ->
-        cat.images.map { imageUrl -> imageUrl to cat.id }
-    }
+    val allImages by viewModel.allImages.collectAsState()
 
     if (allImages.isEmpty()) {
-        // Jeśli to zobaczysz, znaczy że problemem jest ViewModel / MockData
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Brak zdjęć w bazie danych!", style = MaterialTheme.typography.headlineSmall)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "Brak zdjęć w galerii!",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Text(
+                    "Dodaj zdjęcia kotów używając przycisków '+' w sekcji kotów",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     } else {
         LazyVerticalGrid(
@@ -40,16 +47,17 @@ fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel)
             horizontalArrangement = Arrangement.spacedBy(1.dp),
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-            items(allImages) { (imageUrl, catId) ->
+            items(allImages) { image ->
+                val imageFile = File(image.localPath)
                 AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "Zdjęcie kota",
-                    // DODAJEMY PLACEHOLDER - jeśli go zobaczysz, znaczy że nie ma internetu
-                    placeholder = null,
-                    error = null,
+                    model = imageFile,
+                    contentDescription = "Zdjęcie z galerii",
                     modifier = Modifier
                         .aspectRatio(1f)
-                        .clickable { navController.navigate("detail/$catId") },
+                        .clickable {
+                            // Opcjonalnie: można dodać nawigację do szczegółowego podglądu
+                            // Dla prostoty - na razie bez akcji kliknięcia
+                        },
                     contentScale = ContentScale.Crop
                 )
             }

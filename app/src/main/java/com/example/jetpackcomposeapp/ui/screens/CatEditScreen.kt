@@ -1,5 +1,6 @@
 package com.example.jetpackcomposeapp.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,12 +17,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.jetpackcomposeapp.data.model.Cat
+import com.example.jetpackcomposeapp.data.model.Image
+import com.example.jetpackcomposeapp.ui.utils.rememberGalleryLauncher
+import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
+import com.example.jetpackcomposeapp.ui.utils.getStoragePermissions
+import com.example.jetpackcomposeapp.ui.utils.hasStoragePermissions
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
+import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatViewModel) {
@@ -29,11 +38,39 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
     var name by remember { mutableStateOf("") }
     var breed by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var images by remember { mutableStateOf(mutableListOf<String>()) }
-    var showAddImageDialog by remember { mutableStateOf(false) }
-    var newImageUrl by remember { mutableStateOf("") }
+    var catImages by remember { mutableStateOf(listOf<Image>()) }
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+
+    // Launcher for gallery picker
+    val galleryLauncher = rememberGalleryLauncher { uri: Uri ->
+        coroutineScope.launch {
+            val imageRepository = viewModel.getImageRepository()
+            val savedImage = imageRepository.saveImageFromGallery(uri)
+            savedImage?.let { image ->
+                catImages = catImages + image
+            }
+        }
+    }
+
+    // Permission launcher
+    val permissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            galleryLauncher.launch("image/*")
+        }
+    }
+
+
+    fun requestGalleryAccess() {
+        if (hasStoragePermissions(context)) {
+            galleryLauncher.launch("image/*")
+        } else {
+            permissionLauncher.launch(getStoragePermissions())
+        }
+    }
 
     LaunchedEffect(catId) {
         val loadedCat = viewModel.getCatById(catId)
@@ -42,7 +79,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
             name = it.name
             breed = it.breed
             description = it.description
-            images = it.images.toMutableList()
+            catImages = viewModel.getImagesForCat(it)
         }
     }
 
@@ -112,7 +149,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                     Card(
                         modifier = Modifier
                             .size(120.dp)
-                            .clickable { showAddImageDialog = true },
+                            .clickable { requestGalleryAccess() },
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
@@ -124,20 +161,24 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
                                     Icons.Default.Add,
-                                    contentDescription = "Dodaj zdjęcie",
+                                    contentDescription = "Wybierz zdjęcie z galerii",
                                     modifier = Modifier.size(32.dp)
                                 )
-                                Text("Dodaj zdjęcie", style = MaterialTheme.typography.bodySmall)
+                                Text(
+                                    "Wybierz z galerii",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
                     }
                 }
 
                 // Istniejące zdjęcia
-                itemsIndexed(images) { index, imageUrl ->
+                itemsIndexed(catImages) { index, image ->
                     Box(modifier = Modifier.size(120.dp)) {
+                        val imageFile = File(image.localPath)
                         AsyncImage(
-                            model = imageUrl,
+                            model = imageFile,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -148,9 +189,9 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                         // Przycisk usuwania
                         IconButton(
                             onClick = {
-                                val newList = images.toMutableList()
+                                val newList = catImages.toMutableList()
                                 newList.removeAt(index)
-                                images = newList
+                                catImages = newList
                             },
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -201,7 +242,7 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                                     name = name,
                                     breed = breed,
                                     description = description,
-                                    images = images.toList()
+                                    imageIds = catImages.map { it.id }
                                 )
                             )
                             navController.popBackStack()
@@ -213,65 +254,6 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                     Text("Zapisz zmiany")
                 }
             }
-        }
-
-        // Dialog dodawania zdjęcia
-        if (showAddImageDialog) {
-            AlertDialog(
-                onDismissRequest = { showAddImageDialog = false },
-                title = { Text("Dodaj zdjęcie") },
-                text = {
-                    Column {
-                        Text("Wprowadź URL zdjęcia lub wybierz przykład:")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = newImageUrl,
-                            onValueChange = { newImageUrl = it },
-                            label = { Text("URL zdjęcia") },
-                            placeholder = { Text("https://przykład.com/zdjęcie.jpg") },
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Przykładowe zdjęcia:", style = MaterialTheme.typography.bodySmall)
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            TextButton(onClick = { newImageUrl = "https://placekitten.com/400/400" }) {
-                                Text("Kot 1", style = MaterialTheme.typography.bodySmall)
-                            }
-                            TextButton(onClick = { newImageUrl = "https://placekitten.com/450/450" }) {
-                                Text("Kot 2", style = MaterialTheme.typography.bodySmall)
-                            }
-                            TextButton(onClick = { newImageUrl = "https://placekitten.com/500/500" }) {
-                                Text("Kot 3", style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (newImageUrl.isNotBlank()) {
-                                val newList = images.toMutableList()
-                                newList.add(newImageUrl)
-                                images = newList
-                                newImageUrl = ""
-                                showAddImageDialog = false
-                            }
-                        },
-                        enabled = newImageUrl.isNotBlank()
-                    ) {
-                        Text("Dodaj")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        newImageUrl = ""
-                        showAddImageDialog = false
-                    }) {
-                        Text("Anuluj")
-                    }
-                }
-            )
         }
     } ?: run {
         // Loading state

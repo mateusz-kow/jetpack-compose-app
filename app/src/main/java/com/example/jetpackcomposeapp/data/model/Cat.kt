@@ -10,6 +10,6 @@ data class Cat(
     val name: String,
     val breed: String,
     val description: String,
-    val createdAt: Date, // Tu Room użyje naszego konwertera!
-    val images: List<String> // Uwaga: dla list obrazków też będziemy potrzebować konwertera (możesz użyć Stringa rozdzielanego przecinkami)
+    val createdAt: Date,
+    val imageIds: List<Int> // Lista ID obrazów powiązanych z tym kotem
 )
