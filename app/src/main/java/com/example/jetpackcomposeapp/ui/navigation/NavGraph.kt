@@ -25,7 +25,7 @@ fun NavGraph(navController: NavHostController, catViewModel: CatViewModel) {
 
     val canNavigateBack = navController.previousBackStackEntry != null
     val title = when {
-        currentRoute == NavigationItem.Home.route -> "O Autorze"
+        currentRoute == NavigationItem.Home.route -> "Ekran główny"
         currentRoute == NavigationItem.Cats.route -> "Moje Koty"
         currentRoute == NavigationItem.Gallery.route -> "Galeria Zdjęć"
         currentRoute == NavigationItem.Add.route -> "Dodaj Kota"

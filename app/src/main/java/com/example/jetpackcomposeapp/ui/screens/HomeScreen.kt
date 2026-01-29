@@ -70,15 +70,14 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text("Autor: Jan Kowalski", style = MaterialTheme.typography.titleMedium)
-                    Text("GitHub: github.com/jankowalski", style = MaterialTheme.typography.bodyMedium)
+                    Text("Autor: Mateusz Kowalski", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
 
         // About App Section
         Text(
-            text = "Twoje centrum dowodzenia kocim światem",
+            text = "Twoja przeglądarka kotów",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
@@ -105,64 +104,64 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Action Buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (cats.isEmpty()) {
-                Button(
-                    onClick = { navController.navigate("add") },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Dodaj pierwszego kota")
-                }
-            } else {
-                Button(
-                    onClick = { navController.navigate("add") },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Dodaj nowego kota")
-                }
-            }
-
-            Button(
-                onClick = { requestCameraAccess() },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                )
-            ) {
-                Icon(
-                    Icons.Default.ThumbUp,
-                    contentDescription = "Aparat",
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Zrób zdjęcie")
-            }
-        }
-
-        // Quick links
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = { navController.navigate("list") },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Moje Koty")
-            }
-
-            OutlinedButton(
-                onClick = { navController.navigate("gallery") },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Galeria")
-            }
-        }
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        // Action Buttons
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.spacedBy(8.dp)
+//        ) {
+//            if (cats.isEmpty()) {
+//                Button(
+//                    onClick = { navController.navigate("add") },
+//                    modifier = Modifier.weight(1f)
+//                ) {
+//                    Text("Dodaj pierwszego kota")
+//                }
+//            } else {
+//                Button(
+//                    onClick = { navController.navigate("add") },
+//                    modifier = Modifier.weight(1f)
+//                ) {
+//                    Text("Dodaj nowego kota")
+//                }
+//            }
+//
+//            Button(
+//                onClick = { requestCameraAccess() },
+//                modifier = Modifier.weight(1f),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = MaterialTheme.colorScheme.secondary
+//                )
+//            ) {
+//                Icon(
+//                    Icons.Default.ThumbUp,
+//                    contentDescription = "Aparat",
+//                    modifier = Modifier.size(18.dp)
+//                )
+//                Spacer(modifier = Modifier.width(4.dp))
+//                Text("Zrób zdjęcie")
+//            }
+//        }
+//
+//        // Quick links
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.spacedBy(8.dp)
+//        ) {
+//            OutlinedButton(
+//                onClick = { navController.navigate("list") },
+//                modifier = Modifier.weight(1f)
+//            ) {
+//                Text("Moje Koty")
+//            }
+//
+//            OutlinedButton(
+//                onClick = { navController.navigate("gallery") },
+//                modifier = Modifier.weight(1f)
+//            ) {
+//                Text("Galeria")
+//            }
+//        }
     }
 }
