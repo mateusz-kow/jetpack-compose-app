@@ -7,8 +7,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.jetpackcomposeapp.ui.navigation.NavGraph
+import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,7 +19,8 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(modifier = Modifier) {
                     val navController = rememberNavController()
-                    NavGraph(navController = navController)
+                    val catViewModel: CatViewModel = viewModel()
+                    NavGraph(navController = navController, catViewModel = catViewModel)
                 }
             }
         }

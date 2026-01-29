@@ -15,7 +15,7 @@ import com.example.jetpackcomposeapp.ui.screens.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavGraph(navController: NavHostController) {
+fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpackcomposeapp.viewmodel.CatViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -61,8 +61,8 @@ fun NavGraph(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(NavigationItem.Home.route) { HomeScreen(navController) }
-            composable(NavigationItem.Cats.route) { CatListScreen(navController) }
-            composable(NavigationItem.Gallery.route) { GalleryGridScreen(navController) }
+            composable(NavigationItem.Cats.route) { CatListScreen(navController, catViewModel) }
+            composable(NavigationItem.Gallery.route) { GalleryGridScreen(navController, catViewModel) }
 
             // Poprawiona obsługa argumentów (String -> Int)
             composable(
@@ -70,7 +70,7 @@ fun NavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("catId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val catId = backStackEntry.arguments?.getInt("catId") ?: 1
-                CatDetailScreen(navController, catId)
+                CatDetailScreen(navController, catId, catViewModel)
             }
 
             composable(
@@ -78,10 +78,9 @@ fun NavGraph(navController: NavHostController) {
                 arguments = listOf(navArgument("catId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val catId = backStackEntry.arguments?.getInt("catId") ?: 1
-                CatEditScreen(navController, catId)
+                CatEditScreen(navController, catId, catViewModel)
             }
 
-            // Dodaj to do swojego NavHost w NavGraph.kt:
             composable(
                 route = NavigationItem.Viewer.route,
                 arguments = listOf(
@@ -91,7 +90,7 @@ fun NavGraph(navController: NavHostController) {
             ) { backStackEntry ->
                 val catId = backStackEntry.arguments?.getInt("catId") ?: 0
                 val imageIndex = backStackEntry.arguments?.getInt("imageIndex") ?: 0
-                ImageViewerScreen(navController, catId, imageIndex)
+                ImageViewerScreen(navController, catId, imageIndex, catViewModel)
             }
         }
     }

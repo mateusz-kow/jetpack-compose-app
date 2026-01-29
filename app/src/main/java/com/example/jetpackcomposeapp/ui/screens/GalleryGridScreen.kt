@@ -20,7 +20,7 @@ import coil.compose.AsyncImage
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 
 @Composable
-fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel = viewModel()) {
+fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel) {
     val cats by viewModel.cats.collectAsState()
 
     val allImages = cats.flatMap { cat ->

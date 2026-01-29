@@ -28,48 +28,60 @@ fun ImageViewerScreen(
     navController: NavHostController,
     catId: Int,
     initialIndex: Int,
-    viewModel: CatViewModel = viewModel()
+    viewModel: CatViewModel
 ) {
-    val cat = viewModel.getCatById(catId) ?: return
-    val pagerState = rememberPagerState(initialPage = initialIndex, pageCount = { cat.images.size })
+    var cat by remember { mutableStateOf<com.example.jetpackcomposeapp.data.model.Cat?>(null) }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        // Pager do przesuwania zdjęć lewo-prawo
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-            pageSpacing = 16.dp
-        ) { pageIndex ->
-            // Logika Zoomu dla każdego zdjęcia z osobna
-            var scale by remember { mutableFloatStateOf(1f) }
-            val state = rememberTransformableState { zoomChange, _, _ ->
-                scale = (scale * zoomChange).coerceIn(1f, 5f) // Limit zoomu od 1x do 5x
+    LaunchedEffect(catId) {
+        cat = viewModel.getCatById(catId)
+    }
+
+    cat?.let { catData ->
+        val pagerState = rememberPagerState(initialPage = initialIndex, pageCount = { catData.images.size })
+
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            // Pager do przesuwania zdjęć lewo-prawo
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                pageSpacing = 16.dp
+            ) { pageIndex ->
+                // Logika Zoomu dla każdego zdjęcia z osobna
+                var scale by remember { mutableFloatStateOf(1f) }
+                val state = rememberTransformableState { zoomChange, _, _ ->
+                    scale = (scale * zoomChange).coerceIn(1f, 5f) // Limit zoomu od 1x do 5x
+                }
+
+                AsyncImage(
+                    model = catData.images[pageIndex],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale
+                        )
+                        .transformable(state = state),
+                    contentScale = ContentScale.Fit
+                )
             }
 
-            AsyncImage(
-                model = cat.images[pageIndex],
-                contentDescription = null,
+            // Przycisk zamknięcia na górze
+            IconButton(
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale
-                    )
-                    .transformable(state = state),
-                contentScale = ContentScale.Fit
-            )
+                    .statusBarsPadding()
+                    .padding(16.dp)
+                    .align(Alignment.TopStart)
+                    .background(Color.Black.copy(alpha = 0.5f), MaterialTheme.shapes.small)
+            ) {
+                Icon(Icons.Default.Close, contentDescription = "Zamknij", tint = Color.White)
+            }
         }
-
-        // Przycisk zamknięcia na górze
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(16.dp)
-                .align(Alignment.TopStart)
-                .background(Color.Black.copy(alpha = 0.5f), MaterialTheme.shapes.small)
-        ) {
-            Icon(Icons.Default.Close, contentDescription = "Zamknij", tint = Color.White)
+    } ?: run {
+        // Loading state
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            CircularProgressIndicator(color = Color.White)
         }
     }
 }

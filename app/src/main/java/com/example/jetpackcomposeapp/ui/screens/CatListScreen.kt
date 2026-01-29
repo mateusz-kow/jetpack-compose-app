@@ -25,12 +25,21 @@ import java.util.Locale
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun CatListScreen(navController: NavHostController, catViewModel: CatViewModel = viewModel()) {
+fun CatListScreen(navController: NavHostController, catViewModel: CatViewModel) {
     val cats = catViewModel.cats.collectAsState().value
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* TODO: Add new cat */ }) {
+            FloatingActionButton(
+                onClick = {
+                    catViewModel.addCat(
+                        name = "Nowy Kot",
+                        breed = "Mieszanka",
+                        description = "Opis do uzupełnienia",
+                        images = listOf("https://placekitten.com/400/300")
+                    )
+                }
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Cat")
             }
         }
