@@ -4,6 +4,7 @@ package com.example.jetpackcomposeapp.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,24 +16,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.jetpackcomposeapp.ui.screens.*
+import com.example.jetpackcomposeapp.ui.theme.ThemeManager
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavGraph(navController: NavHostController, catViewModel: CatViewModel) {
+fun NavGraph(navController: NavHostController, catViewModel: CatViewModel, themeManager: ThemeManager) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val canNavigateBack = navController.previousBackStackEntry != null
     val title = when {
-        currentRoute == NavigationItem.Home.route -> "Ekran główny"
+        currentRoute == NavigationItem.Home.route -> "O Autorze"
         currentRoute == NavigationItem.Cats.route -> "Moje Koty"
         currentRoute == NavigationItem.Gallery.route -> "Galeria Zdjęć"
+        currentRoute == NavigationItem.Settings.route -> "Ustawienia"
         currentRoute == NavigationItem.Add.route -> "Dodaj Kota"
         currentRoute == NavigationItem.Camera.route -> "Aparat"
         currentRoute?.startsWith("detail") == true -> "Szczegóły Kota"
-        currentRoute?.startsWith("edit") == true -> "Edycja Danych"
-        else -> "Jetpack Compose App"
+        currentRoute?.startsWith("edit") == true -> "Edycja Kota"
+        else -> "Moje Koty"
     }
 
     Scaffold(
@@ -47,6 +50,14 @@ fun NavGraph(navController: NavHostController, catViewModel: CatViewModel) {
                             IconButton(onClick = { navController.navigateUp() }) {
                                 Icon(Icons.Default.ArrowBack, contentDescription = "Wstecz")
                             }
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { navController.navigate(NavigationItem.Settings.route) }) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Ustawienia"
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -71,6 +82,7 @@ fun NavGraph(navController: NavHostController, catViewModel: CatViewModel) {
             composable(NavigationItem.Home.route) { HomeScreen(navController, catViewModel) }
             composable(NavigationItem.Cats.route) { CatListScreen(navController, catViewModel) }
             composable(NavigationItem.Gallery.route) { GalleryGridScreen(navController, catViewModel) }
+            composable(NavigationItem.Settings.route) { SettingsScreen(navController, themeManager) }
             composable(NavigationItem.Add.route) { CatAddScreen(navController, catViewModel) }
             composable(NavigationItem.Camera.route) { CameraScreen(navController, catViewModel) }
 

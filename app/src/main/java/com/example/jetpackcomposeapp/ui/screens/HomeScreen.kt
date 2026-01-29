@@ -3,20 +3,18 @@ package com.example.jetpackcomposeapp.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.jetpackcomposeapp.R
-import com.example.jetpackcomposeapp.ui.navigation.NavigationItem
 import com.example.jetpackcomposeapp.ui.utils.hasCameraPermissions
 import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
 import com.example.jetpackcomposeapp.ui.utils.getCameraPermissions
@@ -104,64 +102,88 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
             }
         }
 
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        // Action Buttons
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            if (cats.isEmpty()) {
-//                Button(
-//                    onClick = { navController.navigate("add") },
-//                    modifier = Modifier.weight(1f)
-//                ) {
-//                    Text("Dodaj pierwszego kota")
-//                }
-//            } else {
-//                Button(
-//                    onClick = { navController.navigate("add") },
-//                    modifier = Modifier.weight(1f)
-//                ) {
-//                    Text("Dodaj nowego kota")
-//                }
-//            }
-//
-//            Button(
-//                onClick = { requestCameraAccess() },
-//                modifier = Modifier.weight(1f),
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = MaterialTheme.colorScheme.secondary
-//                )
-//            ) {
-//                Icon(
-//                    Icons.Default.ThumbUp,
-//                    contentDescription = "Aparat",
-//                    modifier = Modifier.size(18.dp)
-//                )
-//                Spacer(modifier = Modifier.width(4.dp))
-//                Text("Zrób zdjęcie")
-//            }
-//        }
-//
-//        // Quick links
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            OutlinedButton(
-//                onClick = { navController.navigate("list") },
-//                modifier = Modifier.weight(1f)
-//            ) {
-//                Text("Moje Koty")
-//            }
-//
-//            OutlinedButton(
-//                onClick = { navController.navigate("gallery") },
-//                modifier = Modifier.weight(1f)
-//            ) {
-//                Text("Galeria")
-//            }
-//        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Action Buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (cats.isEmpty()) {
+                Button(
+                    onClick = { navController.navigate("add") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        Icons.Default.Pets,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Dodaj pierwszego kota")
+                }
+            } else {
+                Button(
+                    onClick = { navController.navigate("add") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Dodaj kota")
+                }
+            }
+
+            Button(
+                onClick = { requestCameraAccess() },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Icon(
+                    Icons.Default.CameraAlt,
+                    contentDescription = "Aparat",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Zrób zdjęcie")
+            }
+        }
+
+        // Quick links
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { navController.navigate("list") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    Icons.Default.Pets,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Moje Koty")
+            }
+
+            OutlinedButton(
+                onClick = { navController.navigate("gallery") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    Icons.Default.Photo,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Galeria")
+            }
+        }
     }
 }

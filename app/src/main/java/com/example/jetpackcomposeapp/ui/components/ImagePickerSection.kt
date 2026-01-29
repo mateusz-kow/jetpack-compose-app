@@ -7,9 +7,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -62,10 +60,11 @@ fun ImagePickerSection(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Wybierz z galerii",
+                                Icons.Default.PhotoLibrary,
+                                contentDescription = "Wybierz z galerii urządzenia",
                                 modifier = Modifier.size(32.dp)
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text("Galeria", style = MaterialTheme.typography.bodySmall)
                         }
                     }
@@ -88,10 +87,11 @@ fun ImagePickerSection(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                Icons.Default.ThumbUp,
+                                Icons.Default.CameraAlt,
                                 contentDescription = "Zrób zdjęcie aparatem",
                                 modifier = Modifier.size(32.dp)
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text("Aparat", style = MaterialTheme.typography.bodySmall)
                         }
                     }
@@ -114,11 +114,12 @@ fun ImagePickerSection(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                Icons.Default.Add,
+                                Icons.Default.Collections,
                                 contentDescription = "Wybierz z galerii aplikacji",
                                 modifier = Modifier.size(32.dp)
                             )
-                            Text("Galeria App", style = MaterialTheme.typography.bodySmall)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Z App", style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -147,12 +148,12 @@ fun ImagePickerSection(
                         onClick = { onImageRemove(index) },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .size(24.dp)
+                            .size(32.dp)
+                            .padding(4.dp)
                     ) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            ),
+                        Surface(
+                            color = MaterialTheme.colorScheme.error,
+                            shape = RoundedCornerShape(50),
                             modifier = Modifier.size(24.dp)
                         ) {
                             Box(
@@ -160,7 +161,7 @@ fun ImagePickerSection(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    Icons.Default.Delete,
+                                    Icons.Default.Close,
                                     contentDescription = "Usuń",
                                     tint = MaterialTheme.colorScheme.onError,
                                     modifier = Modifier.size(16.dp)
@@ -173,3 +174,5 @@ fun ImagePickerSection(
         }
     }
 }
+
+

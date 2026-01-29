@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,7 +64,7 @@ fun CatListScreen(navController: NavHostController, catViewModel: CatViewModel) 
                     navController.navigate("add")
                 }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Cat")
+                Icon(Icons.Default.Add, contentDescription = "Dodaj kota")
             }
         }
     ) { paddingValues ->

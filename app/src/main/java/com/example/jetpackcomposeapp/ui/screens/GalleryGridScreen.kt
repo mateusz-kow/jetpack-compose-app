@@ -1,13 +1,12 @@
 package com.example.jetpackcomposeapp.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
@@ -58,7 +57,7 @@ fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel,
             FloatingActionButton(
                 onClick = { requestCameraAccess() }
             ) {
-                Icon(Icons.Default.ThumbUp, contentDescription = "Zrób zdjęcie")
+                Icon(Icons.Default.CameraAlt, contentDescription = "Zrób zdjęcie")
             }
         }
     ) { paddingValues ->
