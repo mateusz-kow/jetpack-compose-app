@@ -11,14 +11,16 @@ class CatViewModel : ViewModel() {
     private val _cats = MutableStateFlow(MockData.cats)
     val cats: StateFlow<List<Cat>> = _cats
 
-    fun addCat(name: String) {
-        val newCat = Cat(
-            id = _cats.value.size + 1,
-            name = name,
-            createdAt = Date()
-        )
-        _cats.value = _cats.value + newCat
-    }
+//    fun addCat(name: String) {
+//        val newCat = Cat(
+//            id = _cats.value.size + 1,
+//            name = name,
+//            createdAt = Date()
+// TODO: Uncomment when other fields  are passed
+
+//        )
+//        _cats.value = _cats.value + newCat
+//    }
 
     fun updateCat(id: Int, name: String) {
         _cats.value = _cats.value.map {
@@ -28,5 +30,13 @@ class CatViewModel : ViewModel() {
 
     fun deleteCat(id: Int) {
         _cats.value = _cats.value.filter { it.id != id }
+    }
+
+    fun getCatById(catId: Int): Cat? {
+        return _cats.value.find { it.id == catId }
+    }
+
+    fun updateCat(updatedCat: Cat) {
+        _cats.value = _cats.value.map { if (it.id == updatedCat.id) updatedCat else it }
     }
 }

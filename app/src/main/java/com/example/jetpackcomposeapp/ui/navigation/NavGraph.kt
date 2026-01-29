@@ -37,7 +37,10 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
             composable(NavigationItem.Home.route) { HomeScreen(navController) }
             composable(NavigationItem.Cats.route) { CatListScreen(navController) }
             composable(NavigationItem.Gallery.route) { ImageViewerScreen(navController) }
-            composable(NavigationItem.Detail.route) { CatDetailScreen(navController) }
+            composable(NavigationItem.Detail.route) { backStackEntry ->
+                val catId = backStackEntry.arguments?.getInt("catId")
+                CatDetailScreen(navController, catId ?: 1)
+            }
             composable(NavigationItem.Edit.route) { CatEditScreen(navController) }
         }
     }
