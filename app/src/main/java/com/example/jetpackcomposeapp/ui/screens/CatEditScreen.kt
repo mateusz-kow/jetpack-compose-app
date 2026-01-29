@@ -28,6 +28,8 @@ import com.example.jetpackcomposeapp.ui.utils.rememberGalleryLauncher
 import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
 import com.example.jetpackcomposeapp.ui.utils.getStoragePermissions
 import com.example.jetpackcomposeapp.ui.utils.hasStoragePermissions
+import com.example.jetpackcomposeapp.ui.utils.getCameraPermissions
+import com.example.jetpackcomposeapp.ui.utils.hasCameraPermissions
 import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -55,20 +57,34 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
         }
     }
 
-    // Permission launcher
-    val permissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
+    // Permission launchers
+    val galleryPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
             galleryLauncher.launch("image/*")
         }
     }
 
+    val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            navController.navigate("camera")
+        }
+    }
 
     fun requestGalleryAccess() {
         if (hasStoragePermissions(context)) {
             galleryLauncher.launch("image/*")
         } else {
-            permissionLauncher.launch(getStoragePermissions())
+            galleryPermissionLauncher.launch(getStoragePermissions())
+        }
+    }
+
+    fun requestCameraAccess() {
+        if (hasCameraPermissions(context)) {
+            navController.navigate("camera")
+        } else {
+            cameraPermissionLauncher.launch(getCameraPermissions())
         }
     }
 
@@ -161,13 +177,36 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
                                     Icons.Default.Add,
-                                    contentDescription = "Wybierz zdjęcie z galerii",
+                                    contentDescription = "Wybierz z galerii",
                                     modifier = Modifier.size(32.dp)
                                 )
-                                Text(
-                                    "Wybierz z galerii",
-                                    style = MaterialTheme.typography.bodySmall
+                                Text("Galeria", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                }
+
+                // Przycisk robienia zdjęcia aparatem
+                item {
+                    Card(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clickable { requestCameraAccess() },
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = "Zrób zdjęcie aparatem",
+                                    modifier = Modifier.size(32.dp)
                                 )
+                                Text("Aparat", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

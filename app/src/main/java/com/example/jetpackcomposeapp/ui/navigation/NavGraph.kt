@@ -27,6 +27,7 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
         currentRoute == NavigationItem.Cats.route -> "Moje Koty"
         currentRoute == NavigationItem.Gallery.route -> "Galeria Zdjęć"
         currentRoute == NavigationItem.Add.route -> "Dodaj Kota"
+        currentRoute == NavigationItem.Camera.route -> "Aparat"
         currentRoute?.startsWith("detail") == true -> "Szczegóły Kota"
         currentRoute?.startsWith("edit") == true -> "Edycja Danych"
         else -> "Jetpack Compose App"
@@ -49,7 +50,7 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
             )
         },
         bottomBar = {
-            // Ukrywamy BottomBar na ekranach Edycji i Viewerze dla lepszego UX
+            // Ukrywamy BottomBar na ekranach Edycji, Viewerze i Aparacie dla lepszego UX
             if (currentRoute == NavigationItem.Home.route ||
                 currentRoute == NavigationItem.Cats.route ||
                 currentRoute == NavigationItem.Gallery.route) {
@@ -62,10 +63,11 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
             startDestination = NavigationItem.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(NavigationItem.Home.route) { HomeScreen(navController) }
+            composable(NavigationItem.Home.route) { HomeScreen(navController, catViewModel) }
             composable(NavigationItem.Cats.route) { CatListScreen(navController, catViewModel) }
             composable(NavigationItem.Gallery.route) { GalleryGridScreen(navController, catViewModel) }
             composable(NavigationItem.Add.route) { CatAddScreen(navController, catViewModel) }
+            composable(NavigationItem.Camera.route) { CameraScreen(navController, catViewModel) }
 
             // Poprawiona obsługa argumentów (String -> Int)
             composable(

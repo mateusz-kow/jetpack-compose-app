@@ -2,21 +2,48 @@ package com.example.jetpackcomposeapp.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.jetpackcomposeapp.R
 import com.example.jetpackcomposeapp.ui.navigation.NavigationItem
+import com.example.jetpackcomposeapp.ui.utils.hasCameraPermissions
+import com.example.jetpackcomposeapp.ui.utils.rememberMultiplePermissionsLauncher
+import com.example.jetpackcomposeapp.ui.utils.getCameraPermissions
+import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
+    val cats by catViewModel.cats.collectAsState()
+    val allImages by catViewModel.allImages.collectAsState()
+    val context = LocalContext.current
+
+    // Camera permission launcher
+    val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            navController.navigate("camera")
+        }
+    }
+
+    fun requestCameraAccess() {
+        if (hasCameraPermissions(context)) {
+            navController.navigate("camera")
+        } else {
+            cameraPermissionLauncher.launch(getCameraPermissions())
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,20 +79,90 @@ fun HomeScreen(navController: NavHostController) {
         // About App Section
         Text(
             text = "Twoje centrum dowodzenia kocim światem",
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
 
         // Statistics Section
-        Text(
-            text = "Masz już 5 kotów i 124 zdjęcia",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Twoje statystyki",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Masz już ${cats.size} kotów i ${allImages.size} zdjęć",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
 
-        // Call to Action
-        Button(onClick = { navController.navigate("list") }) {
-            Text("Dodaj pierwszego kota")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Action Buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (cats.isEmpty()) {
+                Button(
+                    onClick = { navController.navigate("add") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Dodaj pierwszego kota")
+                }
+            } else {
+                Button(
+                    onClick = { navController.navigate("add") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Dodaj nowego kota")
+                }
+            }
+
+            Button(
+                onClick = { requestCameraAccess() },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Icon(
+                    Icons.Default.ThumbUp,
+                    contentDescription = "Aparat",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Zrób zdjęcie")
+            }
+        }
+
+        // Quick links
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { navController.navigate("list") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Moje Koty")
+            }
+
+            OutlinedButton(
+                onClick = { navController.navigate("gallery") },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Galeria")
+            }
         }
     }
 }
