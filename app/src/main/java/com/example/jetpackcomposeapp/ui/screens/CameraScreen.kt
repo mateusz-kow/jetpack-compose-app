@@ -35,7 +35,7 @@ import java.util.concurrent.Executors
 fun CameraScreen(
     navController: NavHostController,
     catViewModel: CatViewModel,
-    onImageCaptured: ((String) -> Unit)? = null // Callback dla przekazania ścieżki zdjęcia
+    callbackKey: String? = null // Klucz dla callback system
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -143,9 +143,11 @@ fun CameraScreen(
                                     captureInProgress = false
 
                                     if (savedImage != null) {
-                                        if (onImageCaptured != null) {
-                                            // Tryb callback - przekaż ścieżkę do wywołującego ekranu
-                                            onImageCaptured(savedImage.localPath)
+                                        // Sprawdź czy jest callback w ViewModel
+                                        callbackKey?.let { key ->
+                                            val callback = catViewModel.getCameraCallback(key)
+                                            callback?.invoke(savedImage.id)
+                                            catViewModel.clearCameraCallback(key)
                                         }
                                         navController.popBackStack()
                                     }

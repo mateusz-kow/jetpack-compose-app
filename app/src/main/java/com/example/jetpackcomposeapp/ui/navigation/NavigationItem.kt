@@ -16,5 +16,7 @@ sealed class NavigationItem(val route: String, val title: String, val icon: Imag
     object Edit : NavigationItem("edit/{catId}", "Edit", Icons.Default.Favorite)
     object Add : NavigationItem("add", "Add Cat", Icons.Default.Call)
     object Camera : NavigationItem("camera", "Camera", Icons.Default.Call)
+    object CameraWithCallback : NavigationItem("camera/{callbackMode}", "Camera", Icons.Default.Call)
     object Viewer : NavigationItem("viewer/{catId}/{imageIndex}", "Viewer", Icons.Default.ShoppingCart)
+    object GalleryViewer : NavigationItem("galleryViewer/{imageIndex}", "Gallery Viewer", Icons.Default.ShoppingCart)
 }

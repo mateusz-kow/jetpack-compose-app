@@ -93,8 +93,9 @@ fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel)
                         modifier = Modifier
                             .aspectRatio(1f)
                             .clickable {
-                                // Opcjonalnie: można dodać nawigację do szczegółowego podglądu
-                                // Dla prostoty - na razie bez akcji kliknięcia
+                                // Znajdź indeks tego zdjęcia w liście wszystkich zdjęć
+                                val imageIndex = allImages.indexOf(image)
+                                navController.navigate("galleryViewer/$imageIndex")
                             },
                         contentScale = ContentScale.Crop
                     )

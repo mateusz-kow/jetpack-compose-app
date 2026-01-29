@@ -68,7 +68,18 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
     val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
-            navController.navigate("camera")
+            // Ustaw callback przed nawigacją
+            val callbackKey = "catEdit_${catId}_${System.currentTimeMillis()}"
+            viewModel.setCameraCallback(callbackKey) { imageId ->
+                coroutineScope.launch {
+                    val imageRepository = viewModel.getImageRepository()
+                    val image = imageRepository.getImageById(imageId)
+                    image?.let {
+                        catImages = catImages + it
+                    }
+                }
+            }
+            navController.navigate("camera/$callbackKey")
         }
     }
 
@@ -82,7 +93,18 @@ fun CatEditScreen(navController: NavHostController, catId: Int, viewModel: CatVi
 
     fun requestCameraAccess() {
         if (hasCameraPermissions(context)) {
-            navController.navigate("camera")
+            // Ustaw callback przed nawigacją
+            val callbackKey = "catEdit_${catId}_${System.currentTimeMillis()}"
+            viewModel.setCameraCallback(callbackKey) { imageId ->
+                coroutineScope.launch {
+                    val imageRepository = viewModel.getImageRepository()
+                    val image = imageRepository.getImageById(imageId)
+                    image?.let {
+                        catImages = catImages + it
+                    }
+                }
+            }
+            navController.navigate("camera/$callbackKey")
         } else {
             cameraPermissionLauncher.launch(getCameraPermissions())
         }

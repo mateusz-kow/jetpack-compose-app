@@ -68,7 +68,18 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
     val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
-            navController.navigate("camera")
+            // Ustaw callback przed nawigacją
+            val callbackKey = "catAdd_${System.currentTimeMillis()}"
+            viewModel.setCameraCallback(callbackKey) { imageId ->
+                coroutineScope.launch {
+                    val imageRepository = viewModel.getImageRepository()
+                    val image = imageRepository.getImageById(imageId)
+                    image?.let {
+                        selectedImages = selectedImages + it
+                    }
+                }
+            }
+            navController.navigate("camera/$callbackKey")
         }
     }
 
@@ -82,7 +93,18 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
 
     fun requestCameraAccess() {
         if (hasCameraPermissions(context)) {
-            navController.navigate("camera")
+            // Ustaw callback przed nawigacją
+            val callbackKey = "catAdd_${System.currentTimeMillis()}"
+            viewModel.setCameraCallback(callbackKey) { imageId ->
+                coroutineScope.launch {
+                    val imageRepository = viewModel.getImageRepository()
+                    val image = imageRepository.getImageById(imageId)
+                    image?.let {
+                        selectedImages = selectedImages + it
+                    }
+                }
+            }
+            navController.navigate("camera/$callbackKey")
         } else {
             cameraPermissionLauncher.launch(getCameraPermissions())
         }

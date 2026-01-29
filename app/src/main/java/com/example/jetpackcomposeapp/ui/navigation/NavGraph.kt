@@ -69,6 +69,15 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
             composable(NavigationItem.Add.route) { CatAddScreen(navController, catViewModel) }
             composable(NavigationItem.Camera.route) { CameraScreen(navController, catViewModel) }
 
+            // Camera z callback
+            composable(
+                route = NavigationItem.CameraWithCallback.route,
+                arguments = listOf(navArgument("callbackMode") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val callbackKey = backStackEntry.arguments?.getString("callbackMode")
+                CameraScreen(navController, catViewModel, callbackKey)
+            }
+
             // Poprawiona obsługa argumentów (String -> Int)
             composable(
                 route = NavigationItem.Detail.route,
@@ -96,6 +105,15 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
                 val catId = backStackEntry.arguments?.getInt("catId") ?: 0
                 val imageIndex = backStackEntry.arguments?.getInt("imageIndex") ?: 0
                 ImageViewerScreen(navController, catId, imageIndex, catViewModel)
+            }
+
+            // Gallery Viewer - dla przeglądania wszystkich zdjęć z galerii
+            composable(
+                route = NavigationItem.GalleryViewer.route,
+                arguments = listOf(navArgument("imageIndex") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val imageIndex = backStackEntry.arguments?.getInt("imageIndex") ?: 0
+                GalleryViewerScreen(navController, imageIndex, catViewModel)
             }
         }
     }

@@ -99,6 +99,34 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun refreshCats() {
+        // StateFlow automatycznie odświeży się przez Flow z DAO
+        // Jeśli potrzebne jest wymuszone odświeżenie, można dodać trigger
+    }
+
+    suspend fun addImageToCat(catId: Int, imageId: Int) {
+        val cat = catDao.getCatById(catId)
+        cat?.let {
+            val updatedImageIds = it.imageIds.toMutableList().apply { add(imageId) }
+            updateCat(it.copy(imageIds = updatedImageIds))
+        }
+    }
+
+    // Callback system dla aparatu
+    private val _cameraCallbacks = mutableMapOf<String, (Int) -> Unit>()
+
+    fun setCameraCallback(key: String, callback: (Int) -> Unit) {
+        _cameraCallbacks[key] = callback
+    }
+
+    fun getCameraCallback(key: String): ((Int) -> Unit)? {
+        return _cameraCallbacks[key]
+    }
+
+    fun clearCameraCallback(key: String) {
+        _cameraCallbacks.remove(key)
+    }
+
     suspend fun getCatById(catId: Int): Cat? {
         return catDao.getCatById(catId)
     }
