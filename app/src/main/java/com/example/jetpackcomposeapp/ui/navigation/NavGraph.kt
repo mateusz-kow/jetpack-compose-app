@@ -12,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.jetpackcomposeapp.ui.screens.*
+import com.example.jetpackcomposeapp.viewmodel.CatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +26,7 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
         currentRoute == NavigationItem.Home.route -> "O Autorze"
         currentRoute == NavigationItem.Cats.route -> "Moje Koty"
         currentRoute == NavigationItem.Gallery.route -> "Galeria Zdjęć"
+        currentRoute == NavigationItem.Add.route -> "Dodaj Kota"
         currentRoute?.startsWith("detail") == true -> "Szczegóły Kota"
         currentRoute?.startsWith("edit") == true -> "Edycja Danych"
         else -> "Jetpack Compose App"
@@ -63,6 +65,7 @@ fun NavGraph(navController: NavHostController, catViewModel: com.example.jetpack
             composable(NavigationItem.Home.route) { HomeScreen(navController) }
             composable(NavigationItem.Cats.route) { CatListScreen(navController, catViewModel) }
             composable(NavigationItem.Gallery.route) { GalleryGridScreen(navController, catViewModel) }
+            composable(NavigationItem.Add.route) { CatAddScreen(navController, catViewModel) }
 
             // Poprawiona obsługa argumentów (String -> Int)
             composable(

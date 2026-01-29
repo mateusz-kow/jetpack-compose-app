@@ -14,5 +14,6 @@ sealed class NavigationItem(val route: String, val title: String, val icon: Imag
     object Gallery : NavigationItem("gallery", "Gallery", Icons.Default.ShoppingCart)
     object Detail : NavigationItem("detail/{catId}", "Detail", Icons.Default.Favorite)
     object Edit : NavigationItem("edit/{catId}", "Edit", Icons.Default.Favorite)
+    object Add : NavigationItem("add", "Add Cat", Icons.Default.Call)
     object Viewer : NavigationItem("viewer/{catId}/{imageIndex}", "Viewer", Icons.Default.ShoppingCart)
 }

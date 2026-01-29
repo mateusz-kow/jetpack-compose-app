@@ -32,12 +32,7 @@ fun CatListScreen(navController: NavHostController, catViewModel: CatViewModel) 
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    catViewModel.addCat(
-                        name = "Nowy Kot",
-                        breed = "Mieszanka",
-                        description = "Opis do uzupełnienia",
-                        images = listOf("https://placekitten.com/400/300")
-                    )
+                    navController.navigate("add")
                 }
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Cat")
