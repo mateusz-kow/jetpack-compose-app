@@ -1,12 +1,15 @@
 package com.example.jetpackcomposeapp.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.Date
 
+@Entity(tableName = "cats")
 data class Cat(
-    val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
-    val createdAt: Date,
     val breed: String,
     val description: String,
-    val images: List<String>
+    val createdAt: Date, // Tu Room użyje naszego konwertera!
+    val images: List<String> // Uwaga: dla list obrazków też będziemy potrzebować konwertera (możesz użyć Stringa rozdzielanego przecinkami)
 )

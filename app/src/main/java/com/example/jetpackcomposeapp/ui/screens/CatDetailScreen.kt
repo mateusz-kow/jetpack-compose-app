@@ -1,8 +1,10 @@
 package com.example.jetpackcomposeapp.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -65,11 +67,18 @@ fun CatDetailScreen(navController: NavHostController, catId: Int, viewModel: Cat
                     contentPadding = PaddingValues(top = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(cat.images) { url ->
+                    // Wewnątrz LazyRow w CatDetailScreen.kt:
+                    itemsIndexed(cat.images) { index, url ->
                         AsyncImage(
                             model = url,
                             contentDescription = null,
-                            modifier = Modifier.size(120.dp).clip(RoundedCornerShape(12.dp)),
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    // Kluczowy moment: przekazujemy ID kota i który to obrazek
+                                    navController.navigate("viewer/${cat.id}/$index")
+                                },
                             contentScale = ContentScale.Crop
                         )
                     }

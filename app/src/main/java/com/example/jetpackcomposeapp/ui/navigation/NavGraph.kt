@@ -80,6 +80,19 @@ fun NavGraph(navController: NavHostController) {
                 val catId = backStackEntry.arguments?.getInt("catId") ?: 1
                 CatEditScreen(navController, catId)
             }
+
+            // Dodaj to do swojego NavHost w NavGraph.kt:
+            composable(
+                route = NavigationItem.Viewer.route,
+                arguments = listOf(
+                    navArgument("catId") { type = NavType.IntType },
+                    navArgument("imageIndex") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val catId = backStackEntry.arguments?.getInt("catId") ?: 0
+                val imageIndex = backStackEntry.arguments?.getInt("imageIndex") ?: 0
+                ImageViewerScreen(navController, catId, imageIndex)
+            }
         }
     }
 }
