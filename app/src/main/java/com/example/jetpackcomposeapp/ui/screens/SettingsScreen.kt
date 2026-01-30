@@ -46,7 +46,6 @@ fun SettingsScreen(
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-        // Sekcja motywu
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,7 +102,6 @@ fun SettingsScreen(
             }
         }
 
-        // Dodatkowe informacje
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -149,7 +147,6 @@ fun SettingsScreen(
         }
     }
 
-    // Dialog wyboru motywu
     if (showThemeDialog) {
         AlertDialog(
             onDismissRequest = { showThemeDialog = false },
@@ -226,10 +223,10 @@ fun SettingsScreen(
 }
 
 private fun getThemeName(theme: AppTheme): String = when (theme) {
-    AppTheme.DEFAULT -> "Domyślny (Fioletowy)"
-    AppTheme.OCEAN -> "Ocean (Niebieski)"
-    AppTheme.FOREST -> "Las (Zielony)"
-    AppTheme.SUNSET -> "Zachód słońca (Pomarańczowy)"
+    AppTheme.DEFAULT -> "Fioletowy"
+    AppTheme.OCEAN -> "Niebieski"
+    AppTheme.FOREST -> "Zielony"
+    AppTheme.SUNSET -> "Pomarańczowy"
 }
 
 private fun getThemeIcon(theme: AppTheme) = when (theme) {

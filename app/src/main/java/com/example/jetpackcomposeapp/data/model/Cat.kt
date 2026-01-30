@@ -11,5 +11,5 @@ data class Cat(
     val breed: String,
     val description: String,
     val createdAt: Date,
-    val imageIds: List<Int> // Lista ID obrazów powiązanych z tym kotem
+    val imageIds: List<Int>
 )

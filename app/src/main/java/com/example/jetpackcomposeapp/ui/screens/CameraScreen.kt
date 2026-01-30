@@ -42,7 +42,9 @@ fun CameraScreen(
 
     val imageCapture = remember { ImageCapture.Builder().build() }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black)) {
         val previewView = remember { PreviewView(context) }
 
         AndroidView(
@@ -58,21 +60,36 @@ fun CameraScreen(
             val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
-            } catch (e: Exception) { e.printStackTrace() }
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
-        // UI Controls
         IconButton(
             onClick = { navController.popBackStack() },
-            modifier = Modifier.statusBarsPadding().padding(16.dp).align(Alignment.TopStart)
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(16.dp)
+                .align(Alignment.TopStart)
         ) {
             Icon(Icons.Default.ArrowBack, contentDescription = "Wstecz", tint = Color.White)
         }
 
         IconButton(
-            onClick = { lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK },
-            modifier = Modifier.statusBarsPadding().padding(16.dp).align(Alignment.TopEnd)
+            onClick = {
+                lensFacing =
+                    if (lensFacing == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK
+            },
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(16.dp)
+                .align(Alignment.TopEnd)
         ) {
             Icon(Icons.Default.ThumbUp, contentDescription = "Zmień kamerę", tint = Color.White)
         }
@@ -81,46 +98,55 @@ fun CameraScreen(
             onClick = {
                 if (!captureInProgress) {
                     captureInProgress = true
-                    val tempFile = File(context.cacheDir, "temp_camera_${System.currentTimeMillis()}.jpg")
+                    val tempFile =
+                        File(context.cacheDir, "temp_camera_${System.currentTimeMillis()}.jpg")
                     val options = ImageCapture.OutputFileOptions.Builder(tempFile).build()
 
-                    // Use main executor so callback runs on UI thread; heavy IO will be moved to IO dispatcher
-                    imageCapture.takePicture(options, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
-                        override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                            coroutineScope.launch {
-                                try {
-                                    // Perform bitmap decode + repository save on IO
-                                    val savedImage = withContext(Dispatchers.IO) {
-                                        val bitmap = BitmapFactory.decodeFile(tempFile.absolutePath)
-                                        catViewModel.getImageRepository().saveImageFromCamera(bitmap)
-                                    }
-
-                                    // Invoke callback on main thread
-                                    savedImage?.let { img ->
-                                        callbackKey?.let { key ->
-                                            catViewModel.getCameraCallback(key)?.invoke(img.id)
-                                            catViewModel.clearCameraCallback(key)
+                    imageCapture.takePicture(
+                        options,
+                        ContextCompat.getMainExecutor(context),
+                        object : ImageCapture.OnImageSavedCallback {
+                            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                coroutineScope.launch {
+                                    try {
+                                        val savedImage = withContext(Dispatchers.IO) {
+                                            val bitmap =
+                                                BitmapFactory.decodeFile(tempFile.absolutePath)
+                                            catViewModel.getImageRepository()
+                                                .saveImageFromCamera(bitmap)
                                         }
+
+                                        savedImage?.let { img ->
+                                            callbackKey?.let { key ->
+                                                catViewModel.getCameraCallback(key)?.invoke(img.id)
+                                                catViewModel.clearCameraCallback(key)
+                                            }
+                                        }
+                                    } catch (t: Throwable) {
+                                        t.printStackTrace()
+                                    } finally {
+
+                                        captureInProgress = false
+                                        try {
+                                            tempFile.delete()
+                                        } catch (_: Exception) {
+                                        }
+                                        navController.popBackStack()
                                     }
-                                } catch (t: Throwable) {
-                                    t.printStackTrace()
-                                } finally {
-                                    // cleanup and navigate back on main
-                                    captureInProgress = false
-                                    try { tempFile.delete() } catch (_: Exception) {}
-                                    navController.popBackStack()
                                 }
                             }
-                        }
 
-                        override fun onError(exception: ImageCaptureException) {
-                            exception.printStackTrace()
-                            captureInProgress = false
-                        }
-                    })
+                            override fun onError(exception: ImageCaptureException) {
+                                exception.printStackTrace()
+                                captureInProgress = false
+                            }
+                        })
                 }
             },
-            modifier = Modifier.padding(bottom = 32.dp).size(80.dp).align(Alignment.BottomCenter),
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .size(80.dp)
+                .align(Alignment.BottomCenter),
             shape = CircleShape,
             containerColor = Color.White
         ) {

@@ -26,7 +26,6 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
     val allImages by catViewModel.allImages.collectAsState()
     val context = LocalContext.current
 
-    // Camera permission launcher
     val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
@@ -49,7 +48,6 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Author Section
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
@@ -73,14 +71,12 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
             }
         }
 
-        // About App Section
         Text(
             text = "Twoja przeglądarka kotów",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
 
-        // Statistics Section
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -104,7 +100,6 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Action Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -154,7 +149,6 @@ fun HomeScreen(navController: NavHostController, catViewModel: CatViewModel) {
             }
         }
 
-        // Quick links
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

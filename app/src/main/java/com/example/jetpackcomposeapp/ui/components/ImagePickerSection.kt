@@ -39,12 +39,10 @@ fun ImagePickerSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Lista zdjęć z możliwością usuwania i dodawania
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            // Przycisk dodawania zdjęcia z galerii urządzenia
             item {
                 Card(
                     modifier = Modifier
@@ -71,7 +69,6 @@ fun ImagePickerSection(
                 }
             }
 
-            // Przycisk robienia zdjęcia aparatem
             item {
                 Card(
                     modifier = Modifier
@@ -98,7 +95,6 @@ fun ImagePickerSection(
                 }
             }
 
-            // Przycisk wyboru z galerii aplikacji
             item {
                 Card(
                     modifier = Modifier
@@ -125,7 +121,6 @@ fun ImagePickerSection(
                 }
             }
 
-            // Istniejące zdjęcia
             itemsIndexed(images) { index, image ->
                 Box(modifier = Modifier.size(120.dp)) {
                     val imageFile = File(image.localPath)
@@ -143,7 +138,6 @@ fun ImagePickerSection(
                         contentScale = ContentScale.Crop
                     )
 
-                    // Przycisk usuwania
                     IconButton(
                         onClick = { onImageRemove(index) },
                         modifier = Modifier

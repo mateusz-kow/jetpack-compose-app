@@ -33,7 +33,6 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    // Launcher for gallery picker (device gallery)
     val galleryLauncher = rememberGalleryLauncher { uri: Uri ->
         coroutineScope.launch {
             viewModel.getImageRepository().saveImageFromGallery(uri)?.let {
@@ -42,7 +41,6 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
         }
     }
 
-    // Permission launchers
     val galleryPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
@@ -114,7 +112,6 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Pola tekstowe
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -147,7 +144,6 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sekcja wyboru zdjęć
         ImagePickerSection(
             images = selectedImages,
             onGalleryClick = { requestGalleryAccess() },
@@ -162,7 +158,6 @@ fun CatAddScreen(navController: NavHostController, viewModel: CatViewModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Przycisk zapisu
         Button(
             onClick = {
                 viewModel.addCat(name, breed, description, selectedImages.map { it.id })

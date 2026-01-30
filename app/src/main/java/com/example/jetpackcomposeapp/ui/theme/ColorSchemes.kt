@@ -4,7 +4,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// DEFAULT Theme - Purple/Blue
 object DefaultColors {
     val primaryLight = Color(0xFF6750A4)
     val onPrimaryLight = Color(0xFFFFFFFF)

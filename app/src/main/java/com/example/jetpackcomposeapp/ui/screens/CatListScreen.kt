@@ -151,12 +151,6 @@ fun CatListScreen(navController: NavHostController, catViewModel: CatViewModel) 
                     onClick = {
                         catToDelete?.let { cat ->
                             coroutineScope.launch {
-                                // Nie usuwamy powiązanych zdjęć, bo zdjęcia w galeri to osobny byt od kotów
-//                                val catImages = catViewModel.getImagesForCat(cat)
-//                                catImages.forEach { image ->
-//                                    catViewModel.getImageRepository().deleteImage(image)
-//                                }
-                                // Usuń kota
                                 catViewModel.deleteCat(cat)
                             }
                         }

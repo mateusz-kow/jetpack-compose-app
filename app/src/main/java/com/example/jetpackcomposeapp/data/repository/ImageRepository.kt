@@ -92,13 +92,11 @@ class ImageRepository(private val context: Context, private val imageDao: ImageD
 
     suspend fun deleteImage(image: Image): Boolean {
         return try {
-            // Usuń plik z dysku
             val file = File(image.localPath)
             if (file.exists()) {
                 file.delete()
             }
 
-            // Usuń z bazy danych
             imageDao.deleteImage(image)
             true
 

@@ -14,7 +14,7 @@ object DatabaseModule {
                 AppDatabase::class.java,
                 "cat_database"
             )
-            .fallbackToDestructiveMigration() // Tymczasowo - usuwa i tworzy nową bazę przy zmianie schematu
+            .fallbackToDestructiveMigration()
             .build()
             INSTANCE = instance
             instance

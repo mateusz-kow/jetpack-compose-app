@@ -34,46 +34,6 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
-    init {
-        // Dodaj przykładowe dane przy pierwszym uruchomieniu (bez zdjęć)
-        viewModelScope.launch {
-            val existingCats = catDao.getAllCats().first()
-            if (existingCats.isEmpty()) {
-                initializeWithSampleData()
-            }
-        }
-    }
-
-    private suspend fun initializeWithSampleData() {
-        val sampleCats = listOf(
-            Cat(
-                name = "Whiskers",
-                breed = "Persian",
-                description = "A fluffy and friendly Persian cat with beautiful long fur. Loves to be petted and enjoys sunny spots by the window.",
-                createdAt = Date(),
-                imageIds = emptyList() // Puste - użytkownik doda własne zdjęcia
-            ),
-            Cat(
-                name = "Mittens",
-                breed = "Siamese",
-                description = "A curious and vocal Siamese cat with striking blue eyes. Very intelligent and loves interactive toys.",
-                createdAt = Date(System.currentTimeMillis() - 86400000),
-                imageIds = emptyList()
-            ),
-            Cat(
-                name = "Shadow",
-                breed = "Maine Coon",
-                description = "A large and gentle Maine Coon cat with impressive size and gentle nature. Great with children and other pets.",
-                createdAt = Date(System.currentTimeMillis() - 172800000),
-                imageIds = emptyList()
-            )
-        )
-
-        sampleCats.forEach { cat ->
-            catDao.insertCat(cat)
-        }
-    }
-
     fun addCat(name: String, breed: String, description: String, imageIds: List<Int> = emptyList()) {
         viewModelScope.launch {
             val newCat = Cat(
@@ -99,11 +59,6 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun refreshCats() {
-        // StateFlow automatycznie odświeży się przez Flow z DAO
-        // Jeśli potrzebne jest wymuszone odświeżenie, można dodać trigger
-    }
-
     suspend fun addImageToCat(catId: Int, imageId: Int) {
         val cat = catDao.getCatById(catId)
         cat?.let {
@@ -112,7 +67,6 @@ class CatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Callback system dla aparatu
     private val _cameraCallbacks = mutableMapOf<String, (Int) -> Unit>()
 
     fun setCameraCallback(key: String, callback: (Int) -> Unit) {

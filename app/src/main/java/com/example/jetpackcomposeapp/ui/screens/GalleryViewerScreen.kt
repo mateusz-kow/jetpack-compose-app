@@ -39,14 +39,12 @@ fun GalleryViewerScreen(
         )
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            // Pager do przesuwania zdjęć lewo-prawo
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
                 pageSpacing = 16.dp,
-                userScrollEnabled = true // Zapewniam że swipe jest włączony
+                userScrollEnabled = true
             ) { pageIndex ->
-                // Logika Zoomu dla każdego zdjęcia z osobna
                 var scale by remember { mutableFloatStateOf(1f) }
                 var offset by remember { mutableStateOf(Offset.Zero) }
 
@@ -71,7 +69,6 @@ fun GalleryViewerScreen(
                             translationX = offset.x,
                             translationY = offset.y
                         )
-                        // Tylko dodaj transformable gdy zoom > 1, żeby nie kolidować z pager
                         .let { modifier ->
                             if (scale > 1.05f) {
                                 modifier.transformable(state = state)
@@ -83,7 +80,6 @@ fun GalleryViewerScreen(
                 )
             }
 
-            // Przycisk zamknięcia na górze
             IconButton(
                 onClick = { navController.popBackStack() },
                 modifier = Modifier
@@ -95,7 +91,6 @@ fun GalleryViewerScreen(
                 Icon(Icons.Default.ArrowBack, contentDescription = "Wstecz", tint = Color.White)
             }
 
-            // Wskaźnik pozycji
             if (allImages.size > 1) {
                 Text(
                     text = "${pagerState.currentPage + 1} / ${allImages.size}",
@@ -108,7 +103,6 @@ fun GalleryViewerScreen(
                 )
             }
 
-            // Informacje o zdjęciu
             Card(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -136,7 +130,7 @@ fun GalleryViewerScreen(
             }
         }
     } else {
-        // Loading state
+
         Box(
             modifier = Modifier.fillMaxSize().background(Color.Black),
             contentAlignment = Alignment.Center

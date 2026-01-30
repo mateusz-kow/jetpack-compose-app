@@ -33,7 +33,6 @@ fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel,
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    // Camera permission launcher
     val cameraPermissionLauncher = rememberMultiplePermissionsLauncher { permissions ->
         val allGranted = permissions.values.all { it }
         if (allGranted) {
@@ -135,7 +134,7 @@ fun GalleryGridScreen(navController: NavHostController, viewModel: CatViewModel,
                         if (toDelete != null) {
                             coroutineScope.launch {
                                 viewModel.getImageRepository().deleteImage(toDelete)
-                                // Po usunięciu, ukryj dialog
+
                                 showDeleteDialog = false
                                 imageToDelete = null
                             }

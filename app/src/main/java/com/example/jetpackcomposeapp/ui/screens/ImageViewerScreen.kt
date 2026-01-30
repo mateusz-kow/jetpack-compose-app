@@ -52,14 +52,14 @@ fun ImageViewerScreen(
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            // Pager do przesuwania zdjęć lewo-prawo
+
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
                 pageSpacing = 16.dp,
-                userScrollEnabled = true // Zapewniam że swipe jest włączony
+                userScrollEnabled = true
             ) { pageIndex ->
-                // Logika Zoomu dla każdego zdjęcia z osobna
+
                 var scale by remember { mutableFloatStateOf(1f) }
                 var offset by remember { mutableStateOf(Offset.Zero) }
 
@@ -84,7 +84,7 @@ fun ImageViewerScreen(
                             translationX = offset.x,
                             translationY = offset.y
                         )
-                        // Tylko dodaj transformable gdy zoom > 1, żeby nie kolidować z pager
+
                         .let { modifier ->
                             if (scale > 1.05f) {
                                 modifier.transformable(state = state)
@@ -97,7 +97,6 @@ fun ImageViewerScreen(
             }
         }
 
-        // Przycisk zamknięcia na górze
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier
@@ -122,7 +121,6 @@ fun ImageViewerScreen(
             )
         }
     } else {
-        // Loading state
         Box(
             modifier = Modifier
                 .fillMaxSize()

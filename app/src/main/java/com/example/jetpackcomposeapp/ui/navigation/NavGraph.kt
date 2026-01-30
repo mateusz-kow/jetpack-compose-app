@@ -1,4 +1,3 @@
-// kotlin
 package com.example.jetpackcomposeapp.ui.navigation
 
 import androidx.compose.foundation.layout.padding
@@ -130,7 +129,6 @@ fun NavGraph(navController: NavHostController, catViewModel: CatViewModel, theme
                 GalleryViewerScreen(navController, imageIndex, catViewModel)
             }
 
-            // Trasa dla wyboru obrazu z galerii aplikacji (z callbackKey)
             composable(
                 route = NavigationItem.GallerySelect.route,
                 arguments = listOf(navArgument("callbackKey") { type = NavType.StringType })
