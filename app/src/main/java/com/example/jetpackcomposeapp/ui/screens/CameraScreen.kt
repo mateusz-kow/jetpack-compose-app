@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -91,7 +92,7 @@ fun CameraScreen(
                 .padding(16.dp)
                 .align(Alignment.TopEnd)
         ) {
-            Icon(Icons.Default.ThumbUp, contentDescription = "Zmień kamerę", tint = Color.White)
+            Icon(Icons.Default.Cameraswitch, contentDescription = "Zmień kamerę", tint = Color.White)
         }
 
         FloatingActionButton(
@@ -151,7 +152,7 @@ fun CameraScreen(
             containerColor = Color.White
         ) {
             if (captureInProgress) CircularProgressIndicator(color = Color.Black)
-            else Icon(Icons.Default.ThumbUp, contentDescription = "Foto", tint = Color.Black)
+            else Icon(Icons.Default.CameraAlt, contentDescription = "Foto", tint = Color.Black)
         }
     }
 }

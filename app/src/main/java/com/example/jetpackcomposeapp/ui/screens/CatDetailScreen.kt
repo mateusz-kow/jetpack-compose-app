@@ -56,7 +56,6 @@ fun CatDetailScreen(navController: NavHostController, catId: Int, viewModel: Cat
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
-                // Hero Image - pierwsze zdjęcie lub placeholder
                 if (catImages.isNotEmpty()) {
                     val heroImageFile = File(catImages.first().localPath)
                     AsyncImage(
@@ -66,7 +65,6 @@ fun CatDetailScreen(navController: NavHostController, catId: Int, viewModel: Cat
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    // Placeholder gdy brak zdjęć
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -134,7 +132,6 @@ fun CatDetailScreen(navController: NavHostController, catId: Int, viewModel: Cat
             }
         }
     } ?: run {
-        // Loading state
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
